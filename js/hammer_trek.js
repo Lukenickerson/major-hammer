@@ -124,6 +124,7 @@ function GClass () {
 				this.startEncounter();
 				break;
             case "ENCOUNTER":
+				this.encounter.victoryFunction = null;
                 this.startEncounter();
                 break;
             case "MENU":
@@ -133,7 +134,7 @@ function GClass () {
 				this.drawScreen("Screen_MemoryOf");
 				this.drawTriangle();
 				this.waitForAnyKey(function(){
-					o.drawDialogue("Loc", ["Programming, graphics, etc.", "by Luke Nickerson", "Copyright 2014"]);
+					o.drawDialogue("Loc", ["Coding, graphics, etc.", "by Luke Nickerson", "Copyright 2014"]);
 					o.drawTriangle();
 				});
 				break;
@@ -142,9 +143,9 @@ function GClass () {
 		return this.state;
     }
 	
-    this.handleKeyDown = function(keyName) 
+    this.buttonEvent = function(keyName) 
 	{
-		console.log("handleKeyDown", keyName, this.anyKey);
+		console.log("buttonEvent", keyName, this.anyKey);
 		if (this.anyKey.length > 0) {
 			if (keyName == "A" || keyName == "B") {
 				var f = this.anyKey.pop();
@@ -1021,20 +1022,30 @@ function GClass () {
 		}
 		// Loop through once more to convert the imagesrefObj so it contains images
 		for (var v in imagesRefObj) {
-			sourceUrl = imagesRefObj[v];		
-			imagesRefObj[v] = new Image();
-			imagesRefObj[v].src = 'images/' + sourceUrl;
-			imagesRefObj[v].onload = function () {
-				imagesLoadedCount++;
-				if (imagesLoadedCount >= imagesCount) {
-					console.log("All " + imagesCount + " images loaded.");
-					callback();
+			sourceUrl = imagesRefObj[v];
+			if (typeof sourceUrl === 'string') {
+				imagesRefObj[v] = new Image();
+				imagesRefObj[v].src = 'images/' + sourceUrl;
+				imagesRefObj[v].onload = function () {
+					imagesLoadedCount++;
+					if (imagesLoadedCount >= imagesCount) {
+						console.log("All " + imagesCount + " images loaded.");
+						callback();
+					}
 				}
 			}
 		}
 		console.log("Loading " + imagesCount + " images. (" + imagesLoadedCount + " done so far.)");
 	}
 
+	this.power = function(isPowerOn){
+		var o = this;
+		if (isPowerOn) {
+			this.loadImages(this.images, function(){
+				o.router("SPLASH");
+			});
+		}
+	}
 	
     this.init = function () {
 		this.canvas = document.getElementById('gbScreen');
@@ -1049,38 +1060,38 @@ function GClass () {
 		this.ctx.scale(1,1);
 		this.ctx.save();
 		
+		// Inherited from GbClass
+		this.setupGameToyEvents();
 		
-        $(this.canvas).addClass("on");
-        
         // Events
         var o = this;
         $(document).keydown(function(e){
             switch(e.which) {
                 case 37: // left
                 case 65: // a
-                    o.handleKeyDown("LEFT"); break;
+                    o.buttonEvent("LEFT"); break;
                 case 38: // up
                 case 87: // w
-                    o.handleKeyDown("UP"); break;
+                    o.buttonEvent("UP"); break;
                 case 39: //right
                 case 68: // d
-                    o.handleKeyDown("RIGHT"); break;
+                    o.buttonEvent("RIGHT"); break;
                 case 40: //down
                 case 83: // s
-                    o.handleKeyDown("DOWN"); break;
+                    o.buttonEvent("DOWN"); break;
                 case 69: // e
                 case 32: // space
                 case 13: // enter
-                    o.handleKeyDown("A"); break;
+                    o.buttonEvent("A"); break;
                 case 81: // q
                 case 96: // numpad 0
-                    o.handleKeyDown("B"); break;
+                    o.buttonEvent("B"); break;
                 case 88: // x
                 case 27: // Esc
-                    o.handleKeyDown("START"); break;
+                    o.buttonEvent("START"); break;
                 case 90: // z
                 case 9: // tab
-                    o.handleKeyDown("SELECT"); break;
+                    o.buttonEvent("SELECT"); break;
             }            
             //console.log(e.which);
 			e.preventDefault();
@@ -1088,18 +1099,19 @@ function GClass () {
             o.handleKeyUp(e.which);
         });
         
-		this.loadImages(this.images, function(){
-			o.router("SPLASH");
-		});
+
         
         //this.openDialogue("Hello, World!");
     }
     this.init();
 };
+GClass.prototype = new GbClass();
 
 $(document).ready(function(){
     window.g = new GClass();
-    console.log(window.g);
+    //console.log(window.g);
+	
+	//window.gb.buttonEvent = window.g.buttonEvent
 });
 
 /*
