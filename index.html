@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Major Hammer - Indie Game for Gameboy Jam 3</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/gb.css" />
+	<link rel="stylesheet" href="css/gb_realistic.css" />
+	<link rel="stylesheet" href="css/gb_2x.css" />
+	<link rel="stylesheet" href="css/custom_gb.css" />
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+
+
+<canvas id="gbScreen" width="160" height="144" class="size2"></canvas>
+
+<br />
+<div class="help">
+	Keyboard Controls:
+	<ul>
+		<li>W/A/S/D = Movement</li>
+		<li>E = A Button (Action)</li>
+		<li>Q = B Button (Stats/Help)</li>
+		<li>Z = Select (Credits)</li>
+		<li>X = Start</li>
+	</ul>
+</div>
+
+<!--- original source: http://jsfiddle.net/luken/L3qCJ/ --->
+
+<div class="gb">
+    <div class="outScreen">
+        <div class="inScreen">
+			<!--- <canvas id="gbScreen" width="160" height="144"></canvas> --->
+        </div>
+    </div>
+    <div class="label">
+        Netnindo GAME TOY
+    </div>
+    <div class="dpad">
+        <button type="button" class="left">
+            &#9664;
+        </button>
+        <button type="button" class="up">
+            &#9650;
+        </button>
+        <button type="button" class="down">
+            &#9660;
+        </button>
+        <button type="button" class="right">
+            &#9654;
+        </button>
+    </div>
+    <div class="centerButtons">
+        <button type="button" class="select">select</button>
+        <button type="button" class="start">start</button>
+    </div>
+    <div class="actionButtons">
+        <button type="button" class="B">B</button>
+        <button type="button" class="A">A</button>
+    </div>
+</div>
+
+<!--- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> --->
+<script src="js/libs/jquery-1.11.1.min.js"></script>
+<script src="js/gb.js"></script>
+<script src="js/hammer_trek_classes.js"></script>
+<script src="js/hammer_trek.js"></script>
+
+
+<!---
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-7118348-1', 'deathraygames.com');
+  ga('send', 'pageview');
+</script>
+--->
+
+</body>
+</html>

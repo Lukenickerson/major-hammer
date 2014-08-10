@@ -1,0 +1,18 @@
+#gbScreen {
+    background-color: #D9E4D8; /* dull light color */
+    width: 160px;
+    height: 144px;
+	margin: 10% 0 5% 0;
+	box-shadow: 0em 1em 3em rgba(0,0,0,0.5);
+}
+#gbScreen.on {
+    background-color: #D2EDD0;
+}
+#gbScreen.size2 {
+    width: 320px; 
+    height: 288px; 
+}
+.help {
+	width: 50%; 
+	margin: 5% auto;
+}
