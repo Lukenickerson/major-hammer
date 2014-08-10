@@ -60,7 +60,7 @@ function GClass () {
 		,"Head_Loc" : "Head_Loc.png"
 		,"Head_Scruffy" : "Head_Scruffy.png"
 	};
-	this.color = ["#D2EDD1", "#84AD82", "#576E57", "#283328"];
+	
     this.enemySpeciesArray = ["Rhibble", "Extermobot", "Bugorian"];
 	this.enemySpeciesChances = [50, 30, 20];
 	this.totalTowers = 9;
@@ -678,17 +678,15 @@ function GClass () {
 		this.drawMenu(a);
 	}
     
-    //====================================== CANVAS ===========================
-    
 	
-    this.canvas = {}; // set during init
-    this.ctx = {}; // set during init
+	
+
+    //====================================== CANVAS ===========================
 
     // Pixel measurements
     this.blockSize = { "x" : 16, "y" : 16 };
     this.halfBlockSize = { "x" : 8, "y" : 8 };
-    this.canvasSize = { "x" : 160, "y" : 144 };
-    this.canvasCenter = { "x" : 80, "y" : 72 };
+
     this.canvasCenterOffsetByHalfBlock = { 
         "x" : (this.canvasCenter.x - this.halfBlockSize.x)
         ,"y" : (this.canvasCenter.y - this.halfBlockSize.y)
@@ -776,18 +774,20 @@ function GClass () {
 		);
         
         this.ctx.restore();
+		this.applyCanvasFilter();
     }
 	
 	this.clearCanvas = function(){
 		// Clear canvas
 		this.ctx.imageSmoothingEnabled = false;
-		this.ctx.fillStyle = this.color[0];
+		this.ctx.fillStyle = this.colors[0];
 		this.ctx.clearRect(0,0,this.canvasSize.x,this.canvasSize.y);
 	}
     
 	this.drawScreen = function (imageName) {
 		this.ctx.drawImage(	this.images[imageName]
 			,0,0,this.canvasSize.x,this.canvasSize.y);
+		this.applyCanvasFilter();
 	}
 	
     this.drawCombat = function (friendly, enemy, friendlyDmg, enemyDmg) 
@@ -803,7 +803,7 @@ function GClass () {
 		this.ctx.save();
 		this.clearCanvas();
 		this.ctx.font = "10px Verdana";
-		this.ctx.fillStyle = this.color[2];
+		this.ctx.fillStyle = this.colors[2];
 		this.ctx.drawImage(	this.images[friendly.getForegroundImageName()]
 			,foreground.x, foreground.y, s, s );
 		this.ctx.fillText(friendly.hp + " hp", 60, 65);
@@ -818,10 +818,11 @@ function GClass () {
 			this.ctx.fillText("-" + enemyDmg.amount, 50, 15);
 		}
 		this.ctx.restore();
+		this.applyCanvasFilter();
     }
 	
 	this.drawCombatDialogue = function () {
-		this.drawDialogue(null, ["A = Attack", "Left = Run", "Up/Down = Switch"], false, this.color[1]);
+		this.drawDialogue(null, ["A = Attack", "Left = Run", "Up/Down = Switch"], false, this.colors[1]);
 	}
     
     this.drawDialogue = function (who, lines, includeTriangle, fillStyle) {
@@ -831,12 +832,12 @@ function GClass () {
 			"x" : this.dialogueCanvas.x + padding
 			,"y" : this.dialogueCanvas.y + (padding/2)
 		};
-		if (typeof fillStyle !== "string") fillStyle = this.color[0];
+		if (typeof fillStyle !== "string") fillStyle = this.colors[0];
 		if (typeof includeTriangle !== "boolean") includeTriangle = false;
 	
 		this.ctx.save();
         this.ctx.fillStyle = fillStyle;
-        this.ctx.strokeStyle = this.color[3];
+        this.ctx.strokeStyle = this.colors[3];
         this.ctx.font = fontSize + "px Verdana";
         this.ctx.fillRect(this.dialogueCanvas.x, this.dialogueCanvas.y, this.dialogueSize.x, this.dialogueSize.y);
         this.ctx.strokeRect(this.dialogueCanvas.x, this.dialogueCanvas.y, this.dialogueSize.x, this.dialogueSize.y);
@@ -853,12 +854,13 @@ function GClass () {
 			);
 		}
 		
-        this.ctx.fillStyle = this.color[3];
+        this.ctx.fillStyle = this.colors[3];
         this.ctx.fillText(lines[0], textCoords.x, textCoords.y);
 		this.ctx.fillText(lines[1], textCoords.x, textCoords.y + (fontSize + 2));
 		this.ctx.fillText(lines[2], textCoords.x, textCoords.y + ((fontSize + 2) * 2));
 		
 		this.ctx.restore();
+		this.applyCanvasFilter();
     }
 	
 	this.drawTriangle = function() {
@@ -867,6 +869,7 @@ function GClass () {
 			,(this.dialogueCanvas.y + this.dialogueSize.y - 16)
 			, 16, 16 
 		);
+		this.applyCanvasFilter();
 	}
 	
 	this.drawMenu = function(options, isBackground) 
@@ -893,23 +896,23 @@ function GClass () {
 		this.ctx.save();
 		if (isBackground) {
 			menuCoords.x = padding;
-			this.ctx.fillStyle = this.color[1];
+			this.ctx.fillStyle = this.colors[1];
 		} else {
-			this.ctx.fillStyle = this.color[0];
+			this.ctx.fillStyle = this.colors[0];
 		}
-        this.ctx.strokeStyle = this.color[3];
+        this.ctx.strokeStyle = this.colors[3];
         this.ctx.font = fontSize + "px Verdana";
         this.ctx.fillRect(menuCoords.x, menuCoords.y, menuSize.x, menuSize.y);
         this.ctx.strokeRect(menuCoords.x, menuCoords.y, menuSize.x, menuSize.y);
 		// Write out menu text
-		this.ctx.fillStyle = this.color[3];
+		this.ctx.fillStyle = this.colors[3];
 		for (i = 0; i < options.length; i++) {
 			this.ctx.fillText(options[i], 
 				textCoordStart.x, textCoordStart.y + (i * fontSize)
 			);
 		}
 		// Write out bottom text
-		this.ctx.fillStyle = this.color[2];
+		this.ctx.fillStyle = this.colors[2];
 		this.ctx.fillText(
 			"Towers: " + (this.totalTowers - this.towersDestroyed) + " / " + this.totalTowers
 			,bottomTextCoordStart.x, bottomTextCoordStart.y - fontSize
@@ -1048,20 +1051,8 @@ function GClass () {
 	}
 	
     this.init = function () {
-		this.canvas = document.getElementById('gbScreen');
-		this.ctx = this.canvas.getContext('2d');	
-        this.ctx.font = "14px Verdana";
-        this.ctx.webkitImageSmoothingEnabled = false;
-        this.ctx.mozImageSmoothingEnabled = false;
-        this.ctx.imageSmoothingEnabled = false;
-        this.ctx.fillStyle = "red";
-        this.ctx.strokeStyle = "black";
-        this.ctx.textBaseline = "top";
-		this.ctx.scale(1,1);
-		this.ctx.save();
-		
-		// Inherited from GbClass
-		this.setupGameToyEvents();
+	
+		this.initializeGameToy(); // Inherited from GbClass
 		
         // Events
         var o = this;
@@ -1114,54 +1105,4 @@ $(document).ready(function(){
 	//window.gb.buttonEvent = window.g.buttonEvent
 });
 
-/*
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-ctx.font = "14px Courier New";
-ctx.webkitImageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
-ctx.imageSmoothingEnabled = false;
-ctx.fillStyle = "red";
-ctx.strokeStyle = "black";
-//ctx.strokeText("Sample String", 10, 50);
-ctx.fillText("Sample String", 10, 50);
-
-
-// http://jsfiddle.net/pHwmL/1/
-var map = ctx.getImageData(0,0,160,144);
-var imdata = map.data;
-
-// convert image to grayscale
-var r,g,b,alpha,avg, x = 0;
-for(var p = 0, len = imdata.length; p < len; p+=4) {
-    r = imdata[p]
-    g = imdata[p+1];
-    b = imdata[p+2];
-    alpha = imdata[p+3];
-    // alpha channel (p+3) is ignored           
-    //console.log(r,g,b);
-    avg = Math.floor((r+g+b)/3);
-
-    // Make gray
-    //imdata[p] = imdata[p+1] = imdata[p+2] = avg;
-    // Make Green
-    if (avg > 50 && alpha > 100) {
-        imdata[p] = 0;
-        imdata[p+1] = 150;
-        imdata[p+2] = 0;
-        imdata[p+3] = 255;
-        //console.log(r,g,b,alpha);
-        //x++;
-    } else {
-        imdata[p] = 255;
-        imdata[p+1] = 0;
-        imdata[p+2] = 0;
-        imdata[p+3] = 0;
-    }
-    
-    //imdata[p+3] = 1;
-}
-//console.log(x, imdata.length);
-ctx.putImageData(map,0,0);
-*/
 
