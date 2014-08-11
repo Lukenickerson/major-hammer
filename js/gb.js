@@ -66,7 +66,7 @@ function GbClass () {
 	// Filter
 	this.applyCanvasFilter = function() 
 	{
-		console.log("applying canvas filter");
+		//console.log("applying canvas filter");
 		// http://jsfiddle.net/pHwmL/1/
 		var imgData = this.ctx.getImageData(0,0,this.canvasSize.x,this.canvasSize.y);
 		var dat = imgData.data;

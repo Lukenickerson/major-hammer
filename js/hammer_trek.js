@@ -2,7 +2,10 @@
 
 //======================================= GAME CLASS (CONSTRUCTOR) ============
 
-function GClass () {
+function GClass () 
+{
+	// Connections/Requirements
+	this.sound = window.soundCannon;
     // Static data
 	this.images = {
 		"_path" : "images/"
@@ -148,6 +151,7 @@ function GClass () {
 		console.log("buttonEvent", keyName, this.anyKey);
 		if (this.anyKey.length > 0) {
 			if (keyName == "A" || keyName == "B") {
+				this.sound.play("blip");
 				var f = this.anyKey.pop();
 				//console.log("Popping a new ANYKEY function then calling it", f);
 				f(keyName);
@@ -196,7 +200,7 @@ function GClass () {
 						case "START": 	this.router("MENU"); break;
 						case "SELECT": 	this.router("MENU"); break;
 						case "A": 		this.doPlayerCombatRound("ATTACK"); break;
-						case "B": 		this.router("MENU"); break;
+						//case "B": 		this.router("MENU"); break;
 						case "LEFT":	this.doPlayerCombatRound("RUN"); break;
 						case "UP":
 						case "DOWN":						
@@ -259,7 +263,7 @@ function GClass () {
 			if (typeof callback === 'function') callback();
 		};
 		this.anyKey.push(f);
-		console.log("anykey was given another function: ", this.anyKey);		
+		//console.log("anykey was given another function: ", this.anyKey);		
 	}
 	
 	
@@ -287,6 +291,7 @@ function GClass () {
     this.startEncounter = function () {
 		
 		console.log("Starting encounter");
+		
 		this.stopLoop();
         this.drawOverland();
 		
@@ -306,7 +311,7 @@ function GClass () {
 		this.enemy = new CharacterClass (speciesName, this.pc.zone, this.pc.coords.x, this.pc.coords.y);
 
 		this.drawScreen("Overlay_Encounter");
-        // *** sound
+		this.sound.play("encounter");
         
 		// Wait a second and then switch to combat screen
 		var o = this;
@@ -319,6 +324,10 @@ function GClass () {
 			});
 		}, 1500);
     }
+	
+	this.playCombatSound = function (c) {
+		this.sound.play("combat_" + c.getEquippedItem().imageName);
+	}
 	
     this.doPlayerCombatRound = function (action) 
 	{
@@ -337,6 +346,7 @@ function GClass () {
 					dmgToEnemy = this.pc.getDamage();			
 					this.enemy.damage(dmgToEnemy);		
 					say = ["", "", ("(" + dmgToEnemy.amount + " damage)")];
+					this.playCombatSound(this.pc);
 					if (this.enemy.isDead()) {
 						say[0] = "You kill the " + this.enemy.species + "!";
 						say[1] = "+" + this.enemy.points + " points";
@@ -353,6 +363,7 @@ function GClass () {
 						say[0] = "You hit the " + this.enemy.species + "!";
 					}
 				} else {
+					this.sound.play("whiff");
 					say = ["You miss!", "HAMMER: !@#$%", "smeghead!"];
 				}
 				
@@ -408,7 +419,7 @@ function GClass () {
 			this.pc.damage(dmg);
 			this.drawCombat(this.pc, this.enemy, dmg, null);
 			say = ["", "", ("(" + dmg.amount + " damage)")];
-			
+			this.playCombatSound(this.enemy);
 			// Is the PC dead or just normally hit?
 			if (this.pc.isDead()) {
 				this.pc.subtractAllPoints();
@@ -432,6 +443,7 @@ function GClass () {
 				});
 			}
 		} else {
+			this.sound.play("whiff");
 			say = [this.enemy.species + " misses!"];
 			this.openDialogue(say, function(){
 				//o.doEnemyCombatRound();
@@ -468,13 +480,18 @@ function GClass () {
 		console.log(targetCoords, this.pc.coords);
 		
 		if (zoneMap.isBlockObstacle(block)) {
-			// *** play sound
+			
 			if (block.obstacle.type == "tower") {
 				// Initiate boss combat
 				this.router("BOSS");
 			} else {
 				var isChopped = zoneMap.chopTerrain(targetCoords, 1);
+				if (isChopped) this.sound.play("chop");
+				else this.sound.play("whiff");
+				
 			}
+		} else {
+			this.sound.play("whiff");
 		}
 	}
 	
@@ -488,6 +505,7 @@ function GClass () {
 		this.openDialogue(["You defeated the", "tower guards and", "detonate the tower!"], function(){
 			zoneMap.explodeTerrain(o.action.coords);
 			o.drawScreen("Overlay_Explode");
+			o.sound.play("explosion");
 			o.openDialogue([
 				"BOOM!", 
 				"Towers destroyed: " + o.towersDestroyed, 
@@ -638,10 +656,27 @@ function GClass () {
 			} else {
 				this.drawOverland();
 			}
+			switch (this.storyProgress) {
+				case 4: this.sound.play("teleport");
+					break;
+				case 7: 
+				case 16:
+				case 20:
+				case 25:
+				case 31:
+				case 35:
+					this.sound.play("communicator");
+					break;
+				default:
+					//this.sound.play("whiff");
+			}
+			
 			if (this.storyProgress == 28) {
 				this.pc.giveItem("Static Phaser");
+				this.sound.play("teleport");
 			} else if (this.storyProgress == 32) {
 				this.pc.giveItem("Deathray Cannon");
+				this.sound.play("teleport");
 			}
 			
 			this.storyProgress++;
@@ -1045,6 +1080,7 @@ function GClass () {
 		var o = this;
 		if (isPowerOn) {
 			this.loadImages(this.images, function(){
+				o.sound.play("startup");
 				o.router("SPLASH");
 			});
 		}
@@ -1053,6 +1089,24 @@ function GClass () {
     this.init = function () {
 	
 		this.initializeGameToy(); // Inherited from GbClass
+		
+		this.sound.loadSounds([
+			"blip",
+			"chop",
+			"combat_bite",
+			"combat_deathraycannon"
+			,"combat_extermolaser"
+			,"combat_fists"
+			,"combat_laserpistol"
+			,"combat_laserrifle"
+			,"combat_staticphaser"
+			,"communicator"
+			,"encounter"
+			,"explosion"
+			,"startup"
+			,"teleport"
+			,"whiff"
+		]);		
 		
         // Events
         var o = this;
