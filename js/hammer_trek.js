@@ -81,7 +81,7 @@ function GClass ()
 		victoryFunction : null
 	};
 	this.action = {		// the current/last action taken
-		coords : null
+		coords : { "x" : 25, "y" : 26 }
 	};
 
     // The Map
@@ -233,7 +233,7 @@ function GClass ()
  
 	this.openDialogue = function (t, callback) 
 	{
-		console.log("open dialogue --> ", t, typeof callback);
+		//console.log("open dialogue --> ", t, typeof callback);
 		var line = ["", "", ""];
 		var who = null;
 		if (typeof t === 'string') {
@@ -275,7 +275,7 @@ function GClass ()
 		var o = this;
 		//console.log(keyName);
 		this.stepCount++;
-		if (this.stepCount == 12 || this.stepCount == 30) {
+		if (this.stepCount == 15 || this.stepCount == 30 || this.stepCount == 80) {
 			o.router("STORY");
 		} else {
 			this.pc.move(keyName, true, function(){
@@ -284,7 +284,9 @@ function GClass ()
 		}
 	}
     this.checkForEncounter = function () {
-        if (gameTools.roll1d(20) == 1) {
+		var encounterRoll = gameTools.roll1d(50);
+		console.log(encounterRoll);
+        if (encounterRoll == 1) {
             this.router("ENCOUNTER");
         }
     }
@@ -502,6 +504,7 @@ function GClass ()
 		var zoneMap = this.pc.zone;
 		this.leaveCombat();
 		this.towersDestroyed++;
+		this.setSpeciesChances();
 		this.openDialogue(["You defeated the", "tower guards and", "detonate the tower!"], function(){
 			zoneMap.explodeTerrain(o.action.coords);
 			o.drawScreen("Overlay_Explode");
@@ -514,7 +517,6 @@ function GClass ()
 				o.checkWin();
 			});
 		});
-		this.setSpeciesChances();
 	}
 	this.setSpeciesChances = function () {
 		var p = this.towersDestroyed / this.totalTowers;
@@ -531,13 +533,14 @@ function GClass ()
 	
 	this.checkWin = function(){
 		var o = this;
-		if (o.towersDestroyed > o.totalTowers) {
-			o.router["STORY"];
+		if (o.towersDestroyed >= o.totalTowers) {
+			console.log("You win!");
+			o.router("STORY");
 			return true;
 		} else if (o.towersDestroyed == Math.round(o.totalTowers/3)
 			|| o.towersDestroyed == Math.round(o.totalTowers * (2/3))) 
 		{
-			o.router["STORY"];
+			o.router("STORY");
 			return false;
 		}
 	}
@@ -697,9 +700,10 @@ function GClass ()
 	
     this.openMenu = function()
 	{
-		
+		var scanResult = this.doScan();
 		var a = [
-			"Land Controls:"
+			"Scan: " + scanResult
+			,"Land Controls:"
 			,"A = Action"
 			,"(zap tree)"
 			,"B = Help"
@@ -711,6 +715,34 @@ function GClass ()
 		
 		this.stopLoop();
 		this.drawMenu(a);
+	}
+	
+	this.doScan = function()
+	{
+		var zoneMap = this.pc.zone;
+		var x,y,block,d;
+		var scan = "";
+		var lowestDistance = zoneMap.size.x + zoneMap.size.y;
+		for (x = 0; x < zoneMap.size.x; x++) {
+			for (y = 0; y < zoneMap.size.y; y++) {
+				block = zoneMap.terrain[x][y];
+				if (block.isObstacle) {
+					if (block.obstacle.type == "antennae") {
+						var d = zoneMap.getDistance(x,y, this.pc.coords.x, this.pc.coords.y);
+						if (d < lowestDistance) {
+							lowestDistance = d;
+						}
+					}
+				}
+			}
+		}
+		if (lowestDistance <= 5) 		scan = "/////";
+		else if (lowestDistance < 7) 	scan = ".////";
+		else if (lowestDistance < 9) 	scan = "..///";
+		else if (lowestDistance < 11) 	scan = "...//";
+		else if (lowestDistance < 13) 	scan = "..../";
+		else 							scan = ".....";
+		return scan;
 	}
     
 	

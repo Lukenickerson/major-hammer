@@ -448,7 +448,7 @@ function MapClass (towerNum) {
 		return false;
 	}
 	this.explodeTerrain = function(coords) {
-		console.log("Explode terrain @", coords);
+		//console.log("Explode terrain @", coords);
 		var block = this.getBlock(coords);
 		this.chopTerrain(coords, 100);
 		// *** Do 2 damage to all surrounding squares
