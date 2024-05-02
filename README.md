@@ -4,6 +4,7 @@ Major Hammer is a game made for GBJam 3, and is meant to emulate gameplay and gr
 
 Gameplay is simple - move around terrain, fight enemies that appear randomly, locate towers, and destroy them.
 
-[Play now on deathraygames](http://deathraygames.com/play-online/major-hammer/)
+- Play here on GitHub: https://lukenickerson.github.io/major-hammer/
+- [Play now on deathraygames](http://deathraygames.com/play-online/major-hammer/)
 
 ![Screenshot](/images/screenshots/GameToy.jpg?raw=true "Screenshot")
